@@ -15,5 +15,7 @@ class ContactSeeder extends Seeder
     public function run()
     {
         Contact::factory(10)->create();
+
+        // TODO decide if this seeder is useless - UserSeeder performs contact seed.
     }
 }
