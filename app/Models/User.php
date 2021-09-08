@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -17,11 +18,14 @@ class User extends Authenticatable
      *
      * @var string[]
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+//    protected $fillable = [
+//        'name',
+//        'email',
+//        'password',
+//    ];
+
+    protected $guarded = [];
+//    protected $with     = ['contact'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,8 +49,8 @@ class User extends Authenticatable
     /**
      * Get the contacts for the user.
      */
-    public function contact()
+    public function contacts()
     {
-        return $this->hasMany(Contact::class);
+        return $this->belongsToMany(Contact::class);
     }
 }

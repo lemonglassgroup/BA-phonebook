@@ -4,7 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
+/**
+ * @method static create(array $array)
+ */
 class Contact extends Model
 {
     use HasFactory;
@@ -14,18 +18,23 @@ class Contact extends Model
      *
      * @var string[]
      */
-    protected $fillable = [
-        'user_id',
-        'name',
-        'phone',
-        'email'
-    ];
+//    protected $fillable = [
+//        'user_id',
+//        'name',
+//        'phone',
+//        'email'
+//    ];
+
+    protected $guarded = [];
+//    protected $with     = ['user'];
 
     /**
-     * Get the user that owns the contact.
+     * Get the users that owns the contact.
      */
-    public function user()
+    public function users()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class);
+//            ->withPivot(['user_id'])
+//            ->wherePivot('user_id', '=', Auth::user()->id);
     }
 }

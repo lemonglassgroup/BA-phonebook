@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Contact;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class ContactSeeder extends Seeder
@@ -16,6 +17,11 @@ class ContactSeeder extends Seeder
     {
         Contact::factory(10)->create();
 
-        // TODO decide if this seeder is useless - UserSeeder performs contact seed.
+        foreach (Contact::all() as $contact) {
+            $users = User::inRandomOrder()->take(rand(1,3))->pluck('id');
+            $contact->users()->attach($users);
+        }
+
+        // TODO fix randomisation.
     }
 }

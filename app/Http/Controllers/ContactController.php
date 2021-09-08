@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Models\User;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -10,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ContactController extends Controller
 {
@@ -20,9 +22,21 @@ class ContactController extends Controller
      */
     public function index()
     {
+        DB::listen(function ($query) {
+            logger($query->sql);
+        });
+
+//        $contacts = Contact::with('users')->get();
+//        $contacts = Contact::all()
+//                ->where('user_id', '=', Auth::user()->id);
+
+//        return view('contacts.index', compact('contacts'));
+
+        /** @var User $user */
+        $user = Auth::user();
+
         return view('contacts.index', [
-            'contacts' => Contact::all()
-                ->where('user_id', '=', Auth::user()->id)
+            'contacts' => $user->contacts()->get()
         ]);
     }
 
@@ -44,12 +58,14 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
-        Contact::create([
-            'user_id' => Auth::user()->id,
-            'name'    => request('name'),
-            'phone'   => request('phone'),
-            'email'   => request('email'),
-        ]);
+        /** @var User $user */
+        $user = Auth::user();
+
+        $user->contacts()->save(Contact::create([
+            'name'  => request('name'),
+            'phone' => request('phone'),
+            'email' => request('email'),
+        ]));
 
         return redirect(route('contacts.index'));
     }
