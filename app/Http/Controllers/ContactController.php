@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ContactShareRequest;
 use App\Models\Contact;
 use App\Models\User;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -11,7 +13,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ContactController extends Controller
 {
@@ -20,19 +21,11 @@ class ContactController extends Controller
      *
      * @return Application|Factory|View
      */
-    public function index()
+    public function index(): View|Factory|Application
     {
-        DB::listen(function ($query) {
-            logger($query->sql);
-        });
-
-//        $contacts = Contact::with('users')->get();
-//        $contacts = Contact::all()
-//                ->where('user_id', '=', Auth::user()->id);
-
-//        return view('contacts.index', compact('contacts'));
-
-        /** @var User $user */
+        /**
+         * @var User $user
+         */
         $user = Auth::user();
 
         return view('contacts.index', [
@@ -45,7 +38,7 @@ class ContactController extends Controller
      *
      * @return Application|Factory|View
      */
-    public function create()
+    public function create(): View|Factory|Application
     {
         return view('contacts.create');
     }
@@ -53,12 +46,13 @@ class ContactController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param Request $request
      * @return Application|RedirectResponse|Redirector
      */
-    public function store(Request $request)
+    public function store(): Redirector|RedirectResponse|Application
     {
-        /** @var User $user */
+        /**
+         * @var User $user
+         */
         $user = Auth::user();
 
         $user->contacts()->save(Contact::create([
@@ -74,12 +68,12 @@ class ContactController extends Controller
      * Display the specified resource.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return void
      */
-    public function show($id)
-    {
-        //
-    }
+//    public function show(int $id): void
+//    {
+//        //
+//    }
 
     /**
      * Show the form for editing the specified resource.
@@ -87,7 +81,7 @@ class ContactController extends Controller
      * @param Contact $contact
      * @return Application|Factory|View
      */
-    public function edit(Contact $contact)
+    public function edit(Contact $contact): View|Factory|Application
     {
         return view('contacts.edit')->with('contact', $contact);
     }
@@ -95,11 +89,10 @@ class ContactController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
      * @param Contact $contact
      * @return Application|Redirector|RedirectResponse
      */
-    public function update(Request $request, Contact $contact)
+    public function update(Contact $contact): Redirector|RedirectResponse|Application
     {
         $contact->update([
             'name'  => request('name'),
@@ -118,9 +111,23 @@ class ContactController extends Controller
      * @param int $id
      * @return Application|Redirector|RedirectResponse
      */
-    public function destroy(int $id)
+    public function destroy(int $id): Redirector|RedirectResponse|Application
     {
         Contact::destroy($id);
+
+        return redirect(route('contacts.index'));
+    }
+
+    public function getShareForm(Contact $contact)
+    {
+        return view('contacts.share')->with('contact', $contact);
+    }
+
+    public function share(Contact $contact, ContactShareRequest $request)
+    {
+        $user = User::firstWhere('email', $request->validated()['email']);
+
+        $user->contacts()->save($contact);
 
         return redirect(route('contacts.index'));
     }

@@ -1,28 +1,14 @@
 <?php
 
 use App\Http\Controllers\ContactController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
 
 Route::view('/', 'welcome');
 
-Route::resource('contacts', ContactController::class)
-    ->middleware(['auth'])
-    ->missing(function (Request $request) {
-        return Redirect::route('contacts.index');
-    });
-
+Route::middleware(['auth'])->group(function (){
+    Route::resource('contacts', ContactController::class);
+    Route::get('contacts/{contact}/share', [ContactController::class, 'getShareForm'])->name('contact.share-form');
+    Route::post('contacts/{contact}/share', [ContactController::class, 'share'])->name('contact.share');
+});
 
 require __DIR__ . '/auth.php';
